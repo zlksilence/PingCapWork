@@ -11,11 +11,11 @@ public class TreeTest {
     @Test
     public void testCreateTreeData() {
         int size = 1000;
-        String indexName = "index";
-        String metaName = "meta";
+        String indexName = "index"; // 索引文件名
+        String metaName = "meta";  // 元数据文件名
         File file = new File(indexName);
         if(file.exists()) file.delete();
-        BplusTree tree = BplusTree.createBTree("index","meta",true);
+        BplusTree tree = BplusTree.createBTree("index",metaName,true);
         System.out.println("\nTest random insert " + size + " datas, of order:");
 
         int randomNumber = 0;
@@ -46,6 +46,10 @@ public class TreeTest {
         }
         tree.cacheManger.flushAll();
     }
+
+    /**
+     * 根据建立的B+树索引，从磁盘读取B+树进行查询
+     */
     @Test
     public void testTreeSearch(){
         BplusTree tree = BplusTree.createBTree("index","meta",false);
@@ -62,5 +66,9 @@ public class TreeTest {
 //        p= tree.search(n.getKey());
 //        System.out.println(p);
 //        tree.close();
+    }
+    @Test
+    public void f(){
+        System.out.println("");
     }
 }

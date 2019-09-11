@@ -2,6 +2,10 @@ package PingCap;
 
 import java.util.List;
 
+/**
+ *  查询接口
+ * @author zhoulikang
+ */
 public interface Query {
     void insert (byte[] key,byte[] value);
     byte[] find(byte[] key);

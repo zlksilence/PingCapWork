@@ -6,19 +6,20 @@ import java.io.IOException;
 import java.util.logging.Logger;
 
 /**
- * B+树的定义：
+ * B+树：
+ *  此B+树存放与磁盘上，每个Node节点通过《索引文件》偏移量来确定位置指针并表示此Node
+ *  节点的前驱、后继和父节点等指针 都是通过文件的偏移量来实现
  *
- * 1.任意非叶子结点最多有M个子节点；且M>2；M为B+树的阶数
- * 2.除根结点以外的非叶子结点至少有 (M+1)/2个子节点；
- * 3.根结点至少有2个子节点；
- * 4.除根节点外每个结点存放至少（M-1）/2和至多M-1个关键字；（至少1个关键字）
- * 5.非叶子结点的子树指针比关键字多1个；
- * 6.非叶子节点的所有key按升序存放，假设节点的关键字分别为K[0], K[1] … K[M-2],
- *  指向子女的指针分别为P[0], P[1]…P[M-1]。则有：
- *  P[0] < K[0] <= P[1] < K[1] …..< K[M-2] <= P[M-1]
- * 7.所有叶子结点位于同一层；
- * 8.为所有叶子结点增加一个链指针；
- * 9.所有关键字都在叶子结点出现
+ *  不同与普通B+树，此B+树Node的大小大于 NDXEX_BLOCK_SIZE(默认 8kb) 后将发生分裂，
+ *  以此来保证每个节点落盘时大小都不会超过 INDXEX_BLOCK_SIZE(默认 8kb)
+ *
+ *  B+树叶子节点存放key和 value ，value是此key在 《数据文件》 的偏移量
+ *  B+树的非叶子节点存放key 和 子节点的指针
+ *
+ * B+树 暂仅支持查询、更新、和插入，不支持删除操作
+ *
+ * 通过LRU算法来缓存B+树的Node节点
+ * @author  zhoulikang
  */
 public class BplusTree {
     static Logger log = Logger.getLogger("BplusTree");
@@ -90,6 +91,13 @@ public class BplusTree {
     private BplusTree() {
     }
 
+    /**
+     *
+     * @param indexName 索引文件名 存放B+树
+     * @param metaName 元数据名  存放B+树的头
+     * @param isCreate 是否能新建B+  树索引  新建即清空文件内容
+     * @return
+     */
     public static BplusTree createBTree(String indexName,String metaName,boolean isCreate){
         BplusTree tree = new BplusTree();
         CacheManger cacheManger = new CacheManger(indexName,metaName,isCreate,tree);
@@ -106,127 +114,6 @@ public class BplusTree {
     public void close() throws IOException {
         cacheManger.close();
     }
-
-    // 测试
-
-
-//    private static void testOrderRemove(int size, int order) {
-//        BplusTree tree = new BplusTree(order);
-//        System.out.println("\nTest order remove " + size + " datas, of order:"
-//                + order);
-//        System.out.println("Begin order insert...");
-//        for (int i = 0; i < size; i++) {
-//
-//            tree.insertOrUpdate(Util.intToByteArray(i), i);
-//        }
-//        System.out.println("Begin order remove...");
-//        long current = System.currentTimeMillis();
-//        for (int j = 0; j < size; j++) {
-//            if (tree.remove(Util.intToByteArray(j)) == null) {
-//                System.err.println("得不到数据:" + j);
-//                break;
-//            }
-//        }
-//        long duration = System.currentTimeMillis() - current;
-//        System.out.println("time elpsed for duration: " + duration);
-//        System.out.println(tree.getHeight());
-//    }
-
-//    private static void testRandomRemove(int size, int order) {
-//        BplusTree tree = new BplusTree(order);
-//        System.out.println("\nTest random remove " + size + " datas, of order:"
-//                + order);
-//        Random random = new Random();
-//        boolean[] a = new boolean[size + 10];
-//        List<Integer> list = new ArrayList<Integer>();
-//        int randomNumber = 0;
-//        System.out.println("Begin random insert...");
-//        for (int i = 0; i < size; i++) {
-//            randomNumber = random.nextInt(size);
-//            a[randomNumber] = true;
-//            list.add(randomNumber);
-//            tree.insertOrUpdate(randomNumber, randomNumber);
-//        }
-//        System.out.println("Begin random remove...");
-//        long current = System.currentTimeMillis();
-//        for (int j = 0; j < size; j++) {
-//            randomNumber = list.get(j);
-//            if (a[randomNumber]) {
-//                if (tree.remove(randomNumber) == null) {
-//                    System.err.println("得不到数据:" + randomNumber);
-//                    break;
-//                } else {
-//                    a[randomNumber] = false;
-//                }
-//            }
-//        }
-//        long duration = System.currentTimeMillis() - current;
-//        System.out.println("time elpsed for duration: " + duration);
-//        System.out.println(tree.getHeight());
-//    }
-//
-//    private static void testOrderSearch(int size, int order) {
-//        BplusTree tree = new BplusTree(order);
-//        System.out.println("\nTest order search " + size + " datas, of order:"
-//                + order);
-//        System.out.println("Begin order insert...");
-//        for (int i = 0; i < size; i++) {
-//            tree.insertOrUpdate(i, i);
-//        }
-//        System.out.println("Begin order search...");
-//        long current = System.currentTimeMillis();
-//        for (int j = 0; j < size; j++) {
-//            if (tree.get(j) == null) {
-//                System.err.println("得不到数据:" + j);
-//                break;
-//            }
-//        }
-//        long duration = System.currentTimeMillis() - current;
-//        System.out.println("time elpsed for duration: " + duration);
-//    }
-//
-//    private static void testRandomSearch(int size, int order) {
-//        BplusTree tree = new BplusTree(order);
-//        System.out.println("\nTest random search " + size + " datas, of order:"
-//                + order);
-//        Random random = new Random();
-//        boolean[] a = new boolean[size + 10];
-//        int randomNumber = 0;
-//        System.out.println("Begin random insert...");
-//        for (int i = 0; i < size; i++) {
-//            randomNumber = random.nextInt(size);
-//            a[randomNumber] = true;
-//            tree.insertOrUpdate(randomNumber, randomNumber);
-//        }
-//        System.out.println("Begin random search...");
-//        long current = System.currentTimeMillis();
-//        for (int j = 0; j < size; j++) {
-//            randomNumber = random.nextInt(size);
-//            if (a[randomNumber]) {
-//                if (tree.get(randomNumber) == null) {
-//                    System.err.println("得不到数据:" + randomNumber);
-//                    break;
-//                }
-//            }
-//        }
-//        long duration = System.currentTimeMillis() - current;
-//        System.out.println("time elpsed for duration: " + duration);
-//    }
-//
-
-//
-//    private static void testOrderInsert(int size, int order) {
-//        BplusTree tree = new BplusTree(order);
-//        System.out.println("\nTest order insert " + size + " datas, of order:"
-//                + order);
-//        long current = System.currentTimeMillis();
-//        for (int i = 0; i < size; i++) {
-//            tree.insertOrUpdate(i, i);
-//        }
-//        long duration = System.currentTimeMillis() - current;
-//        System.out.println("time elpsed for duration: " + duration);
-//    }
-
     @Override
     public String toString() {
         return "BplusTree{" +

@@ -8,23 +8,27 @@ import java.io.RandomAccessFile;
 import java.util.*;
 import java.util.logging.Logger;
 
-/*
-
+/**
+ * 缓存管理
+ * LUR策略管理B+树的Node节点
+ * 最老使用的Node将写回磁盘
+ * 查找不到的Node将从磁盘读取或新建
+ * @author zhoulikang
  */
 public class CacheManger {
     static Logger log = Logger.getLogger("CacheManger");
-    Map<Long,BplusNode> m;
+    Map<Long,BplusNode> m;   // 存储内存中的Node
     RandomAccessFile indexFile=null;
     RandomAccessFile metaFile=null;
-
-    List<Long> empty = new LinkedList<>();
-    Long currentP=0L;
-    public Meta meta;
-    public BplusTree tree;
-    private int cacheSize=10;
+    List<Long> empty = new LinkedList<>();  /// 存储已被释放的Node
+    Long currentP=0L;      //   当前文件的偏移量
+    public Meta meta;      // 元数据信息
+    public BplusTree tree;  // B+数
+    private int cacheSize=384; // 缓存的Node节点数量  大约 3G = 384×8KB
     public long maxSize=0;
     public CacheManger(String indexName,String metaName,boolean isCreate,BplusTree tree) {
 //        m = new HashMap<>();
+        // LUR 缓存使用的Node Long是Node在索引文件的便宜
         m = new LinkedHashMap<Long,BplusNode>((int) Math.ceil(cacheSize / 0.75f) + 1, 0.75f, true) {
             @Override
             protected boolean removeEldestEntry(Map.Entry<Long,BplusNode> eldest) {
@@ -82,15 +86,22 @@ public class CacheManger {
         m.put(tree.root.position,tree.root);
     }
 
+    /**
+     * 根据偏移position获取一个Node
+     * @param position
+     * @return
+     */
    public   BplusNode getNode(long position){
        if(position<0){
             return null;
        }
+       // 缓存存在则 直接返回
         if(m.containsKey(position)){
             return m.get(position);
         }
        BplusNode node =null;
        try {
+           // 不存在则从磁盘读取
             node = new BplusNode(position, false, false, this);
             indexFile.seek(node.position);
             node.read(indexFile);
@@ -101,6 +112,13 @@ public class CacheManger {
         }
        return node;
     }
+
+    /**
+     * 直接新建一个索引Node
+     * @param isLeaf
+     * @param isRoot
+     * @return
+     */
     public BplusNode newNode(boolean isLeaf, boolean isRoot){
          //  从空闲块新建
         if(empty.size()>0){
@@ -115,6 +133,11 @@ public class CacheManger {
         currentP+=Config.INDEX_BLOCK_SIZE;
         return node;
     }
+
+    /**
+     * 释放一个节点
+     * @param position
+     */
     public void deleteNode(long position){
         if(m.containsKey(position)){
             m.remove(position);
@@ -143,6 +166,11 @@ public class CacheManger {
     public int getNumNode(){
         return m.size();
     }
+
+    /**
+     * 将一个Node写入磁盘
+     * @param node
+     */
     private void flush(BplusNode node){
         try {
             indexFile.seek(node.position);
@@ -158,6 +186,10 @@ public class CacheManger {
             log.severe("脏也刷新失败！");
         }
     }
+
+    /**
+     * 将全部的Node写入磁盘
+     */
     public void flushAll(){
         try {
             m.values().forEach(node->{

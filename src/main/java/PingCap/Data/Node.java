@@ -5,6 +5,10 @@ import java.util.Arrays;
 
 import PingCap.Util.Util;
 
+/**
+ * Node 用于封装key value
+ * @author  zhoulikang
+ */
 public class Node {
     private byte[] key;
     private byte[] value;
@@ -12,8 +16,11 @@ public class Node {
         key = k;
         value = v;
     }
+
     public Node(){
     }
+
+    // 解析 读一个key 和 value
     public Node(DataInput dataInput) throws IOException {
         key = Util.readKey(dataInput);
         value = Util.readValue(dataInput);
@@ -37,10 +44,22 @@ public class Node {
     public byte[] toBytes(){
         return Util.getBytes(key,value);
     }
+
+    /**
+     * 写入磁盘  序列化
+     * @param out
+     * @throws IOException
+     */
     public void write(DataOutput out) throws IOException{
         Util.writeKey(out,key);
         Util.writeValue(out,value);
     }
+
+    /**
+     *  从磁盘读 反序列
+     * @param input
+     * @throws IOException
+     */
     public void read(DataInput input) throws IOException{
         key = Util.readKey(input);
         value = Util.readValue(input);

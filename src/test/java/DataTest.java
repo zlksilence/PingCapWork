@@ -16,7 +16,7 @@ public class DataTest {
     static int[] keyWeight=     { 8,   1,1,0,0, 0,  0,  0}; // key的大小权重
 //    static int[] keyWeight=     { 4,   1,1,2,0, 0,  0,  0}; // key的大小权重
     static int[] valueWeight =  { 0,   0,0,6,2, 1,  1,  0}; //value的大小权重
-
+    // 获取一个随机长度
     static byte[] getRandomByte(int len){
         char[] ch = new char[len];
         for(int i =0;i<len;i++){
@@ -25,6 +25,7 @@ public class DataTest {
         }
         return String.valueOf(ch).getBytes();
     }
+    // 加权法随机获取一个key
     static int  getKeyLen(){
         int k = random.nextInt(10);
         for(int i =0;i<keyWeight.length;i++){
@@ -36,6 +37,7 @@ public class DataTest {
         }
         return 0;
     }
+    // 加权法随机获取一个value
     static int  getValueLen(){
         int k = random.nextInt(10);
         for(int i =0;i<valueWeight.length;i++){
@@ -47,11 +49,15 @@ public class DataTest {
         }
         return 0;
     }
+    /**随机造成数据
+       dataFileName 指定了数据文件的名字
+     **/
     @Test
     public void productRandomData() {
-        String dataFileName = "data_10G.bin";
-        // 1000 大约13M  10000 大约121M 100000 大约1G
-        long count =1000000;
+        String dataFileName = "data.bin";
+        // 造数据的条数 1000 大约13M  10000 大约121M 100000 大约1G
+//        long count =1000000; // 大约10G
+        long count =100000; // 大约1G
         long size=0;
         File file = new File(dataFileName);
         if(file.exists()) file.delete();
@@ -59,6 +65,7 @@ public class DataTest {
         try(RandomAccessFile dos = new  RandomAccessFile(dataFileName,"rw")) {
             int c=1;
             for (int i = 0; i < count; i++) {
+                // 随机产生key 和 value
                 byte[] key = getRandomByte(getKeyLen());
                 byte[] value = getRandomByte(getValueLen());
                 Util.writeKey(dos, key);
@@ -77,6 +84,10 @@ public class DataTest {
         long duration = System.currentTimeMillis() - current;
         System.out.println("time  " + duration+" ms");
     }
+    /**
+     * 从文换的开始顺序读取 1000条数 并打印
+     * 测试造的数据则正确与否
+     * **/
     @Test
     public void printData() {
         String dataFileName = "data.bin";
@@ -96,6 +107,10 @@ public class DataTest {
         long duration = System.currentTimeMillis() - current;
         System.out.println("time  " + duration+" ms");
     }
+    /**
+     * 从文换的开始顺序读取 读取全部文件数据 并打印
+     * 测试造的数据则正确与否
+     * **/
     @Test
     public void printAllData() {
 //        String dataFileName = "data.bin";
@@ -103,14 +118,13 @@ public class DataTest {
         long count =0;
         long current = System.currentTimeMillis();
         try( RandomAccessFile bis = new  RandomAccessFile(dataFileName,"r")) {
-//            List<Node> list = new ArrayList<>();
+
             long len = bis.length();
             while (bis.getFilePointer()<len) {
-//                long l = bis.getFilePointer();
+                // 读取一个 key value 用Node封装
                 Node node = new Node(bis);
                 System.out.println(node.toUtf8String());
                 count++;
-//                System.out.println(count);
             }
             System.out.println("总共"+count+"条数据");
         }catch (IOException e){

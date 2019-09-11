@@ -9,6 +9,10 @@ import java.util.logging.Logger;
 import PingCap.Util.Util;
 import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils;
 
+/**
+ * 数据文件
+ * @author
+ */
 public class DataFile {
     static Logger log = Logger.getLogger("DataFile");
     RandomAccessFile dataFile;
@@ -20,6 +24,13 @@ public class DataFile {
     }
 
     //  not safe
+
+    /**
+     *  根据偏移p 查找 value
+     * @param p
+     * @param key
+     * @return
+     */
    public synchronized   byte[] find(long p,byte[] key)  {
         try {
             dataFile.seek(p);
@@ -36,6 +47,14 @@ public class DataFile {
             return null;
         }
     }
+
+    /**
+     * 文件追加
+     * @param key
+     * @param value
+     * @return
+     * @throws IOException
+     */
     public synchronized   long append (byte[] key,byte[] value) throws IOException {
         long position=fileLen;
         dataFile.seek(position);
