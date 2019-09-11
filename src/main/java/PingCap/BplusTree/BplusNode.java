@@ -336,15 +336,18 @@ public class BplusNode  {
         used--;
     }
     private void check(long p){
+        // 验证节点大小是否符合要求
         if(getNode(p).bsize>Config.INDEX_BLOCK_SIZE){
             if(getNode(p).entries.size()==1){
                 log.severe("叶子节点某个key太大，超过Index Block 的最大值,不能被分裂");
                 return;
             }
+            // 不符合，太大，节点拆分
             getNode(p).breakUp();
         }
     }
     private void AdjusParent(long left,long right){
+        //调整节点父指针
         //如果不是根节点
         if (getNode(parent) != null) {
             //调整父子节点关系
@@ -378,6 +381,7 @@ public class BplusNode  {
         }
     }
     private void breakUp(){
+        // 节点分裂成两个
         long left = newNode(true,false).position;
         long right = newNode(true,false).position;
         //设置链接
@@ -399,6 +403,7 @@ public class BplusNode  {
         //复制原节点关键字到分裂出来的新节点
         copy2Nodes(left, right);
         AdjusParent(left,right);
+        // 验证拆分后的节点是否需要继续拆分
         check(left);
         check(right);
     }

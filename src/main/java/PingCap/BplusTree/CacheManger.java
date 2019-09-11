@@ -24,7 +24,7 @@ public class CacheManger {
     Long currentP=0L;      //   当前文件的偏移量
     public Meta meta;      // 元数据信息
     public BplusTree tree;  // B+数
-    private int cacheSize=10; // 缓存的Node节点数量  大约 3G = 384×8KB
+    private int cacheSize=384; // 缓存的Node节点数量  大约 3G = 384×8KB
     public long maxSize=0;
     public CacheManger(String indexName,String metaName,boolean isCreate,BplusTree tree) {
 //        m = new HashMap<>();
@@ -33,7 +33,7 @@ public class CacheManger {
             @Override
             protected boolean removeEldestEntry(Map.Entry<Long,BplusNode> eldest) {
 //                flush(eldest.getValue());
-                if(size()>cacheSize && !eldest.getValue().isRoot ){
+                if(size()>cacheSize  ){
                     if(eldest.getValue().isRoot || eldest.getValue().used>0){
                         m.remove(eldest.getKey());
                         m.put(eldest.getKey(),eldest.getValue());
@@ -106,7 +106,7 @@ public class CacheManger {
             indexFile.seek(node.position);
             node.read(indexFile);
             m.put(position,node);
-
+            m.get(position);
         }catch (IOException e){
            log.severe("读取索引块失败！");
         }
