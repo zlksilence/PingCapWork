@@ -64,7 +64,7 @@ public class TestMain {
         String metaName ="meta";
 //        String indexName = "index_10G";
 //        String metaName = "meta_10G";
-        long count =1000;
+        long count =100;
         Query q=null;
         long current = System.currentTimeMillis();
         try {
