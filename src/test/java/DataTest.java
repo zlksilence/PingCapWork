@@ -12,9 +12,9 @@ public class DataTest {
 
     static String str="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
     static Random random = new Random();
-    static double[] size=       {0.1,0.5,1,4,16,64,128,1024}; // 单位kb
+    static double[] size=       {0.1,0.5,1,4,16,64,128,1024}; // 单位kb  一下key value将表明生成的各大小的权重
     static int[] keyWeight=     { 8,   1,1,0,0, 0,  0,  0}; // key的大小权重
-//    static int[] keyWeight=     { 4,   1,1,2,0, 0,  0,  0}; // key的大小权重
+//    static int[] keyWeight=     { 4,   1,1,2,0, 0,  0,  0};
     static int[] valueWeight =  { 0,   0,0,6,2, 1,  1,  0}; //value的大小权重
     // 获取一个随机长度
     static byte[] getRandomByte(int len){

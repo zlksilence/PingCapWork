@@ -58,12 +58,12 @@ public class TestMain {
      */
     @Test
     public void testQueryM(){
-//        String dataName = "data.bin";
-        String dataName = "data_10G.bin";
-//        String indexName= "index";
-//        String metaName ="meta";
-        String indexName = "index_10G";
-        String metaName = "meta_10G";
+        String dataName = "data.bin";
+//        String dataName = "data_10G.bin";
+        String indexName= "index";
+        String metaName ="meta";
+//        String indexName = "index_10G";
+//        String metaName = "meta_10G";
         long count =1000;
         Query q=null;
         long current = System.currentTimeMillis();
@@ -78,6 +78,7 @@ public class TestMain {
             for (int i = 0; i < count; i++) {
                 Node node=new Node(dos);
                 byte[] v= q.find(node.getKey());
+//                System.out.println(i);
                 if(v==null){
                     System.out.println("未查找到此key:"+new String(node.getKey()));
                 }

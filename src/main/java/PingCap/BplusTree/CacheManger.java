@@ -24,7 +24,7 @@ public class CacheManger {
     Long currentP=0L;      //   当前文件的偏移量
     public Meta meta;      // 元数据信息
     public BplusTree tree;  // B+数
-    private int cacheSize=384; // 缓存的Node节点数量  大约 3G = 384×8KB
+    private int cacheSize=10; // 缓存的Node节点数量  大约 3G = 384×8KB
     public long maxSize=0;
     public CacheManger(String indexName,String metaName,boolean isCreate,BplusTree tree) {
 //        m = new HashMap<>();
@@ -72,7 +72,7 @@ public class CacheManger {
                 metaFile = new RandomAccessFile(metaName, "rw");
                 meta = new Meta();
                 meta.read(metaFile);
-                tree.root = new BplusNode(0,true,true,this);
+                tree.root = new BplusNode(meta.getMaxPosition(),true,true,this);
                 indexFile.seek(meta.getRootPosition());
                 tree.root.read(indexFile);
                 currentP=meta.getMaxPosition();
